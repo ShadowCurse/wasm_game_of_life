@@ -25,17 +25,18 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
-impl Default for Universe {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 #[wasm_bindgen]
 impl Universe {
-    pub fn new() -> Self {
-        let width = 64;
-        let height = 64;
+    pub fn new(width: u32, height: u32) -> Self {
+        let cells = (0..width * height).map(|_| Cell::Dead).collect();
+
+        Self {
+            width,
+            height,
+            cells,
+        }
+    }
+    pub fn new_random(width: u32, height: u32) -> Self {
         let cells = (0..width * height)
             .map(|_| {
                 if Math::random() < 0.5 {
@@ -111,6 +112,19 @@ impl Universe {
             }
         }
         count
+    }
+}
+
+impl Universe {
+    pub fn get_cells(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn set_cells_alive(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter() {
+            let idx = self.get_index(*row, *col);
+            self.cells[idx] = Cell::Alive;
+        }
     }
 }
 

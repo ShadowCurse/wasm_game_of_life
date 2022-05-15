@@ -28,6 +28,7 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new(width: u32, height: u32) -> Self {
+        console_log!("Initializing universe with size: {}/{}", width, height);
         let cells = (0..width * height).map(|_| Cell::Dead).collect();
 
         Self {
@@ -37,6 +38,7 @@ impl Universe {
         }
     }
     pub fn new_random(width: u32, height: u32) -> Self {
+        console_log!("Initializing universe with size: {}/{}", width, height);
         let cells = (0..width * height)
             .map(|_| {
                 if Math::random() < 0.5 {

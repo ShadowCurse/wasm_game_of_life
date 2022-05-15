@@ -1,14 +1,16 @@
-import { Universe, Cell } from "wasm_game_of_life";
+import { Universe, Cell, set_panic_hook } from "wasm_game_of_life";
 import { memory } from "wasm_game_of_life/wasm_game_of_life_bg";
+
+set_panic_hook();
 
 const CELL_SIZE = 5;
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
-const universe = Universe.new_random(64, 64);
-const width = universe.width();
-const height = universe.height();
+const width = 64;
+const height = 64;
+const universe = Universe.new_random(width, height);
 
 const canvas = document.getElementById("game_of_life_canvas");
 canvas.height = (CELL_SIZE + 1) * height + 1;

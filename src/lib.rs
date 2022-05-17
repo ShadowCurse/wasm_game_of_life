@@ -1,14 +1,32 @@
 mod utils;
 
+use js_sys::Math;
 use std::fmt;
 use wasm_bindgen::prelude::*;
-use js_sys::Math;
+use web_sys::console;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+pub struct Timer<'a> {
+    name: &'a str,
+}
+
+impl<'a> Timer<'a> {
+    pub fn new(name: &'a str) -> Self {
+        // console::time_with_label(name);
+        Self { name }
+    }
+}
+
+impl<'a> Drop for Timer<'a> {
+    fn drop(&mut self) {
+        // console::time_end_with_label(self.name);
+    }
+}
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -87,26 +105,33 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
-        let mut next = self.cells.clone();
+        let _timer = Timer::new("Universe::tick");
+        let mut next = {
+            let _timer = Timer::new("Universe::tick::clone_cells");
+            self.cells.clone()
+        };
+        {
+            let _timer = Timer::new("Universe::tick::new_generation");
+            for row in 0..self.height {
+                for col in 0..self.width {
+                    let idx = self.get_index(row, col);
+                    let cell = self.cells[idx];
+                    let live_neightbors = self.live_neightbor_count(row, col);
 
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let live_neightbors = self.live_neightbor_count(row, col);
+                    let next_cell = match (cell, live_neightbors) {
+                        (Cell::Alive, x) if x < 2 => Cell::Dead,
+                        (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                        (Cell::Alive, x) if x > 3 => Cell::Dead,
+                        (Cell::Dead, 3) => Cell::Alive,
+                        (otherwise, _) => otherwise,
+                    };
 
-                let next_cell = match (cell, live_neightbors) {
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    (Cell::Dead, 3) => Cell::Alive,
-                    (otherwise, _) => otherwise,
-                };
-
-                next[idx] = next_cell;
+                    next[idx] = next_cell;
+                }
             }
         }
 
+        let _timer = Timer::new("Universe::tick::set_new_cells");
         self.cells = next;
     }
 

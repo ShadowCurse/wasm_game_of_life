@@ -5,7 +5,7 @@ authors = ["ShadowCurse <shadowcurse57@gmail.com>"]
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["lib"]#cdylib", "rlib"]
 
 [features]
 default = ["console_error_panic_hook"]
@@ -34,3 +34,4 @@ wasm-bindgen-test = "0.3.13"
 [profile.release]
 # Tell `rustc` to optimize for small code size.
 opt-level = "s"
+debug = true
